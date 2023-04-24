@@ -1,5 +1,8 @@
 // MinimaxPlayer.java
 
+import static java.lang.Integer.max;
+import static java.lang.Integer.min;
+
 /**
  *
  * @author Sean Bridges
@@ -120,7 +123,7 @@ final class MinimaxCalculator {
       if (board.move(moves[i])) {
         moveCount++;
 
-        int strength = expandMinNode(depth - 1, maxStrength);
+        int strength = expandMinNode(MIN_POSSIBLE_STRENGTH, MAX_POSSIBLE_STRENGTH, depth - 1);
         if (strength > maxStrength) {
           maxStrength = strength;
           maxIndex = i;
@@ -150,7 +153,7 @@ final class MinimaxCalculator {
    * continue to expand the tree, since the min node above us only cares if we are
    * lower than its current min score.
    */
-  private int expandMaxNode(int depth, int parentMinimum) {
+  private int expandMaxNode(int alpha, int beta, int depth) {
     // base step
     if (depth == 0 || board.isGameOver()) {
       return board.getBoardStats().getStrength(maxPlayer);
@@ -163,14 +166,14 @@ final class MinimaxCalculator {
     for (int i = 0; i < moves.length; i++) {
       if (board.move(moves[i])) {
         moveCount++;
-        int strength = expandMinNode(depth - 1, maxStrength);
+        alpha = max(alpha, expandMinNode(alpha, beta, depth - 1));
 
-        if (strength >= parentMinimum) {
+        if (alpha >= beta) {
           board.undoLastMove();
-          return strength;
+          return alpha;
         }
-        if (strength > maxStrength) {
-          maxStrength = strength;
+        if (alpha > maxStrength) {
+          maxStrength = alpha;
         }
         board.undoLastMove();
       } // end if move made
@@ -187,7 +190,7 @@ final class MinimaxCalculator {
    * smaller than this, return immediatly, since the parent max node will choose
    * the greatest value it can find.
    */
-  private int expandMinNode(int depth, int parentMaximum) {
+  private int expandMinNode(int alpha, int beta, int depth) {
     // base step
     if (depth == 0 || board.isGameOver()) {
       return board.getBoardStats().getStrength(maxPlayer);
@@ -200,14 +203,14 @@ final class MinimaxCalculator {
     for (int i = 0; i < moves.length; i++) {
       if (board.move(moves[i])) {
         moveCount++;
-        int strength = expandMaxNode(depth - 1, minStrength);
+        beta = min(beta, expandMaxNode(alpha, beta, depth - 1));
 
-        if (strength <= parentMaximum) {
+        if (beta <= alpha) {
           board.undoLastMove();
-          return strength;
+          return beta;
         }
-        if (strength < minStrength) {
-          minStrength = strength;
+        if (beta < minStrength) {
+          minStrength = beta;
         }
         board.undoLastMove();
       } // end if move made
